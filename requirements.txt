@@ -1,0 +1,12 @@
+Django==1.11.4
+django-allauth==0.29.0
+django-betterforms==1.1.4
+django-contrib-comments==1.7.3
+django-formtools==1.0
+django-payments==0.9.6
+django-tinymce==2.4.0
+requests==2.12.3
+requests-oauthlib==0.7.0
+uWSGI==2.0.14
+virtualenv==15.1.0
+

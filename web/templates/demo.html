@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'header' %}
+    <style>
+        .row{
+            margin-bottom:15px;
+        }
+
+        textarea.form-control{
+            height:200px;
+        }
+
+        .btn-default{
+            background-color:#eee;
+        }
+        .myscroll{
+            overflow-y: auto;
+            height:250px;
+        }
+
+    </style>
+    <style type="text/css">
+        .container_wrapper {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #container {
+            max-width: 100%;
+            height: 550px;
+            margin: auto;
+        }
+        #container2 {
+            max-width: 100%;
+            height: 550px;
+            margin: auto;
+        }
+    </style>
+
+{% endblock %}
+{% block 'body' %}
+
+
+<center><h1>sdfsdf</h1></center>
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-10">
+			<select class="form-control" name="query" id="query_list" onchange="query_changed(this)">
+                <option value="{{ selected_question_id }}">{{ selected_question_text }}</option>
+                {% for question in questions %}
+                    <option value="{{ question.id }}">{{ question.text }}</option>
+                {% endfor %}
+            </select>
+			
+		</div>
+		<div class="col-lg-2">
+            <a id ="button_a" href="">
+			<button class="btn btn-block btn-primary" id="cgqa_at_once">실행</button>
+            </a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-12">
+
+            <!--<div class="row">-->
+                <!--<div class="col-lg-12">-->
+                    <!--<button class="btn btn-block btn-default" id="decomposed_answer_title">▼ Decomposed Questions ▼</button>-->
+                    <!--<div id="decomposed_question_result" class="form-control myscroll" rows="1">-->
+                        <!--{% for decomposed_text in decomposed %}-->
+                            <!--{{ decomposed_text }} <br>-->
+                        <!--{% endfor %}-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+            <!--<div class="row">-->
+                <!--<div class="col-lg-12">-->
+                    <!--<button class="btn btn-block btn-default" id="pos_tagging">▼ POS tagging ▼</button>-->
+                    <!--<div id="pos_tagging_result" class="form-control myscroll" rows="1">-->
+                        <!--{% for decomposed_text in decomposed %}-->
+                            <!--{{ decomposed_text.pos_tagging }} <br>-->
+                        <!--{% endfor %}-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <button class="btn btn-block btn-default" id="query_graph">▼ Query Graph ▼</button>
+                    <div class="container_wrapper" >
+                        {% if question.answer_type == 'Who' %}
+                        Answer Type : <b>Person</b>
+                        {% elif question.answer_type == 'Where' %}
+                        Answer Type : <b>Location</b>
+                        {% elif question.answer_type == 'Date' %}
+                        Answer Type : <b>Time</b>
+                        {% else %}
+                        Answer Type : <b>Other</b>
+                        {% endif %}
+
+                        <div id="container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <button class="btn btn-block btn-default" id="query_graph2">▼ CGKB ▼</button>
+                    <div class="container_wrapper">
+                        <div id="container2"></div>
+                    </div>
+                </div>
+            </div>
+
+
+			<div class="row">
+				<div class="col-lg-6">
+                    <button class="btn btn-block btn-default" id="pred_answer_title">▼ Predicted Answer Candidates ▼</button>
+
+                    <div id="pred_answer_result" class="form-control myscroll" rows="10">
+                        {% for candidate in candidates %}
+                            {% if candidate.1 == True %}
+                                <b><p style="color:blue;"> {{ candidate.0 }} </p></b>
+                            {% else %}
+                                <p style="color:red;"> {{ candidate.0 }} </p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+				</div>
+                <div class="col-lg-6">
+                    <button class="btn btn-block btn-default" id="gold_answer_title">▼ Gold Answers ▼</button>
+                    <div id="gold_answer_result" class="form-control myscroll" rows="2">
+                        {% for gold_answer in gold_answers %}
+                        <p> {{ gold_answer }} </p>
+                        {% endfor %}
+                    </div>
+                </div>
+			</div>
+
+		</div>
+	</div>
+	
+	
+</div>
+
+<script src="{% static '/plugins/sigma.layout.forceAtlas2/worker.js' %}"></script>
+<script src="{% static '/plugins/sigma.layout.forceAtlas2/supervisor.js' %}"></script>
+
+<div style="height:100px"></div>
+
+    <script>
+
+        sigma.parsers.json("{% static "graph.json" %}", {
+            renderers:[{
+            container: 'container',type:'canvas',
+            settings: {
+                defaultNodeColor: '#ecc79e',
+                defaultEdgeColor: '#000000',
+
+                labelSizeRatio: 2,
+                borderSize: 1,
+            }}],
+            settings: {
+
+                minEdgeSize: 0.5,
+                    maxEdgeSize: 2,
+                    enableEdgeHovering: true,
+
+                    defaultEdgeHoverColor: '#000',
+                    edgeHoverSizeRatio: 2,
+                    edgeHoverExtremities: true,
+                autoRescale: false
+            }
+        }, function(s) {
+            var edges = s.graph.edges();
+            var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+            dragListener.bind('startdrag', function(event) {
+                console.log(event);
+            });
+            dragListener.bind('drag', function(event) {
+                console.log(event);
+            });
+            dragListener.bind('drop', function(event) {
+                console.log(event);
+            });
+            dragListener.bind('dragend', function(event) {
+                console.log(event);
+            });
+        });
+
+        s = sigma.parsers.json("{% static "concept_graph.json" %}", {
+            renderers:[{
+                container: 'container2',type:'canvas',
+                settings: {
+                    defaultNodeColor: '#ecc79e',
+                    defaultEdgeColor: '#000000',
+
+                    labelSizeRatio: 2,
+                    borderSize: 1,
+                }}],
+            settings: {
+
+                minEdgeSize: 0.5,
+                maxEdgeSize: 2,
+                enableEdgeHovering: true,
+
+                defaultEdgeHoverColor: '#000',
+                edgeHoverSizeRatio: 2,
+                edgeHoverExtremities: true,
+                autoRescale: true
+            }
+        }, function(s) {
+            var edges = s.graph.edges();
+            s.startForceAtlas2({worker: true, barnesHutOptimize: false, slowDown:10, gravity:1});
+            setTimeout(function(){ s.stopForceAtlas2() }, 1000);
+
+            var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+            dragListener.bind('startdrag', function(event) {
+                console.log(event);
+            });
+            dragListener.bind('drag', function(event) {
+                console.log(event);
+            });
+            dragListener.bind('drop', function(event) {
+                console.log(event);
+            });
+            dragListener.bind('dragend', function(event) {
+                console.log(event);
+            });
+        });
+
+
+    </script>
+
+    <script type="text/javascript">
+
+        function query_changed(selectQuery) {
+            var qid = selectQuery.value
+            console.log(selectQuery)
+            console.log(qid)
+            var link = document.getElementById("button_a");
+            link.setAttribute("href", "?qid=" + qid);
+
+
+        }
+    </script>
+
+    <script>
+        ;(function(undefined) {
+            'use strict';
+
+            if (typeof sigma === 'undefined')
+                throw 'sigma is not declared';
+
+            // Initialize packages:
+            sigma.utils.pkg('sigma.canvas.labels');
+
+            /**
+             * This label renderer will just display the label on the right of the node.
+             *
+             * @param  {object}                   node     The node object.
+             * @param  {CanvasRenderingContext2D} context  The canvas context.
+             * @param  {configurable}             settings The settings function.
+             */
+            sigma.canvas.labels.def = function(node, context, settings) {
+                var fontSize,
+                    prefix = settings('prefix') || '',
+                    size = node[prefix + 'size'];
+
+                if (size < 9)
+                    return;
+
+                if (!node.label || typeof node.label !== 'string')
+                    return;
+
+                fontSize = (settings('labelSize') === 'fixed') ?
+                    settings('defaultLabelSize') :
+                    settings('labelSizeRatio') * size;
+
+                context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
+                    fontSize + 'px ' + settings('font');
+                context.fillStyle = (settings('labelColor') === 'node') ?
+                    (node.color || settings('defaultNodeColor')) :
+                    settings('defaultLabelColor');
+
+                context.fillText(
+                    node.label,
+                    Math.round(node[prefix + 'x'] + size + 3),
+                    Math.round(node[prefix + 'y'] + fontSize / 3)
+                );
+            };
+        }).call(this);
+    </script>
+{% endblock %}
